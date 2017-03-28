@@ -1,0 +1,8 @@
+*.suo
+packages/
+ConsoleApplication/obj/
+ConsoleApplication/bin/
+Google-ProtoBuf-Example/bin/
+Google-ProtoBuf-Example/obj/
+SerializationUsingTextEncoding/obj/
+SerializationUsingTextEncoding/bin/
