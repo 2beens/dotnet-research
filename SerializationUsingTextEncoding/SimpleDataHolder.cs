@@ -29,4 +29,12 @@ namespace SerializationUsingTextEncoding
             return _aString2;           
         }
     }
+
+    internal class SimpleDataHolder2
+    {
+        [SerializationInfo("num1")]
+        public int ANumber { get; set; }
+        [SerializationInfo("bool1")]
+        public bool ABool { get; set; }        
+    }
 }
