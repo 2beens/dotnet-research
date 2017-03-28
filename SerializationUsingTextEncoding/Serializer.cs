@@ -11,6 +11,12 @@ namespace SerializationUsingTextEncoding
 
         public static byte[] Serialize(object objectToSerialize)
         {
+            string objectStringData = Serialize2String(objectToSerialize);
+            return Encoding.Unicode.GetBytes(objectStringData);
+        }
+
+        private static string Serialize2String(object objectToSerialize)
+        {
             var serializedData = string.Empty;
 
             var memberInfos = new HashSet<MemberInfo>();
@@ -29,13 +35,17 @@ namespace SerializationUsingTextEncoding
                     ? (memberInfo as FieldInfo).GetValue(objectToSerialize)
                     : (memberInfo as PropertyInfo)?.GetValue(objectToSerialize);
 
+                // check for complex type
+                if (dataValue != null && dataValue.GetType().IsClass && dataValue.GetType() != typeof(string))
+                    dataValue = "{" + Serialize2String(dataValue) + "}";
+
                 serializedData += dataKey + KEY_VALUE_DELIMITER + dataValue + PROPERTIES_DELIMITER;
             }
 
             if (serializedData.Length > 0)
                 serializedData = serializedData.Substring(0, serializedData.Length - PROPERTIES_DELIMITER.Length);
 
-            return Encoding.Unicode.GetBytes(serializedData);
+            return serializedData;
         }
 
         public static T Deserialize<T>(byte[] objectData) where T : new()

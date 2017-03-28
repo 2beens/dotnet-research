@@ -10,7 +10,8 @@ namespace SerializationUsingTextEncoding
     {
         static void Main(string[] args)
         {
-            SimpleDataHolder simpleDataHolder1 = new SimpleDataHolder {ANumber = 1, AString = "str1", ABool = true};
+            Person person1 = new Person {Age = 25, Name = "Name1"};
+            SimpleDataHolder simpleDataHolder1 = new SimpleDataHolder {ANumber = 1, AString = "str1", ABool = true, Person = person1};
             byte[] simpleDataHolderBytes = Serializer.Serialize(simpleDataHolder1);
 
             //TODO: write object byte array to a file

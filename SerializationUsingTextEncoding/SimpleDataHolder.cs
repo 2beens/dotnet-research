@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SerializationUsingTextEncoding
 {
-    internal class SimpleDataHolder
+    public class SimpleDataHolder
     {
         [SerializationInfo("num1")]
         public int ANumber { get; set; }
@@ -18,6 +18,9 @@ namespace SerializationUsingTextEncoding
 
         [SerializationInfo("str2")]
         private readonly string _aString2;
+
+        [SerializationInfo("person1")]
+        public Person Person { get; set; }
 
         public SimpleDataHolder()
         {
@@ -30,7 +33,7 @@ namespace SerializationUsingTextEncoding
         }
     }
 
-    internal class SimpleDataHolder2
+    public class SimpleDataHolder2
     {
         [SerializationInfo("num1")]
         public int ANumber { get; set; }
