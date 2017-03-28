@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SerializationUsingTextEncoding
 {
@@ -14,9 +11,9 @@ namespace SerializationUsingTextEncoding
 
         public static byte[] Serialize(object objectToSerialize)
         {
-            string serializedData = String.Empty;
+            var serializedData = string.Empty;
 
-            HashSet<MemberInfo> memberInfos = new HashSet<MemberInfo>();
+            var memberInfos = new HashSet<MemberInfo>();
             memberInfos.UnionWith(objectToSerialize.GetType().GetProperties());
             memberInfos.UnionWith(objectToSerialize.GetType().GetFields
                 (BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public));
@@ -28,13 +25,13 @@ namespace SerializationUsingTextEncoding
                     continue;
 
                 var dataKey = ((SerializationInfoAttribute) serializationInfoAtt).DataKey;
-                var dataValue = (memberInfo is FieldInfo)
+                var dataValue = memberInfo is FieldInfo
                     ? (memberInfo as FieldInfo).GetValue(objectToSerialize)
                     : (memberInfo as PropertyInfo)?.GetValue(objectToSerialize);
 
                 serializedData += dataKey + KEY_VALUE_DELIMITER + dataValue + PROPERTIES_DELIMITER;
             }
-            
+
             if (serializedData.Length > 0)
                 serializedData = serializedData.Substring(0, serializedData.Length - PROPERTIES_DELIMITER.Length);
 
@@ -43,9 +40,61 @@ namespace SerializationUsingTextEncoding
 
         public static T Deserialize<T>(byte[] objectData) where T : new()
         {
-            T deserializedObject = new T();
+            var deserializedObject = new T();
 
+            var serializedDataString = Encoding.Unicode.GetString(objectData);
 
+            if (string.IsNullOrEmpty(serializedDataString))
+                return deserializedObject;
+
+            var key2MemberInfoMap = new Dictionary<string, MemberInfo>();
+            var memberInfos = new HashSet<MemberInfo>();
+            memberInfos.UnionWith(typeof(T).GetProperties());
+            memberInfos.UnionWith(typeof(T).GetFields
+                (BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public));
+            foreach (var memberInfo in memberInfos)
+            {
+                var serializationInfoAtt = memberInfo.GetCustomAttribute(typeof(SerializationInfoAttribute));
+                if (serializationInfoAtt == null)
+                    continue;
+
+                key2MemberInfoMap.Add(((SerializationInfoAttribute) serializationInfoAtt).DataKey, memberInfo);
+            }
+
+            var propertiesString = serializedDataString.Split(PROPERTIES_DELIMITER.ToCharArray());
+            foreach (var propString in propertiesString)
+            {
+                if (propString.Length == 0)
+                    continue;
+
+                var propDetails = propString.Split(KEY_VALUE_DELIMITER.ToCharArray());
+                if (propDetails.Length != 2)
+                    continue;
+
+                var dataKey = propDetails[0];
+                var dataValue = propDetails[1];
+
+                MemberInfo foundMemeberInfo;
+                if (!key2MemberInfoMap.TryGetValue(dataKey, out foundMemeberInfo))
+                    continue;
+
+                if (foundMemeberInfo is PropertyInfo)
+                {
+                    var prop = (PropertyInfo) foundMemeberInfo;
+                    if (prop.PropertyType == typeof(int))
+                        prop.SetValue(deserializedObject, int.Parse(dataValue));
+                    else if (prop.PropertyType == typeof(bool))
+                        prop.SetValue(deserializedObject, bool.Parse(dataValue));
+                    else
+                        prop.SetValue(deserializedObject, dataValue);
+
+                    //TODO: other types
+                }
+                else
+                {
+                    (foundMemeberInfo as FieldInfo)?.SetValue(deserializedObject, dataValue);
+                }
+            }
 
             return deserializedObject;
         }

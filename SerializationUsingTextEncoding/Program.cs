@@ -17,7 +17,7 @@ namespace SerializationUsingTextEncoding
             // File.WriteAllBytes(string path, byte[] simpleDataHolderBytes)
 
             SimpleDataHolder deserializeDataHolder = Serializer.Deserialize<SimpleDataHolder>(simpleDataHolderBytes);
-            Console.WriteLine("Simple Data Holder deserialized ? " + (simpleDataHolderBytes != null));
+            Console.WriteLine("Simple Data Holder deserialized ? " + (deserializeDataHolder != null));
             Console.ReadKey();
         }
     }
